@@ -28,6 +28,7 @@
     "@sushiswap/currency": "workspace:*",
     "@sushiswap/format": "workspace:*",
     "@sushiswap/graph-client": "workspace:*",
+    "@sushiswap/graph-client-2": "workspace:*",
     "@sushiswap/hooks": "workspace:*",
     "@sushiswap/math": "workspace:*",
     "@sushiswap/redux-localstorage": "workspace:*",

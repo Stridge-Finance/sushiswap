@@ -95,18 +95,3 @@ query OneWeekBlocks(
     timestamp
   }
 }
-
-query CustomBlocks(
-  $timestamp: Int!
-  $chainIds: [Int!]!
-) {
-  customBlocks(
-    timestamp: $timestamp
-    chainIds: $chainIds
-  ) {
-    id
-    chainId
-    number
-    timestamp
-  }
-}

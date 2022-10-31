@@ -47,7 +47,7 @@
       "type": "object",
       "properties": {
         "apr": {
-          "type": "number"
+          "type": ["number", null]
         },
         "rewardPerDay": {
           "type": "number"

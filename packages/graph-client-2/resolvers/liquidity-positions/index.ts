@@ -7,9 +7,9 @@ import {
 } from '@sushiswap/graph-config'
 import { isPromiseFulfilled } from '@sushiswap/validate'
 
-import { LiquidityPosition, QueryResolvers, Resolvers } from '../.graphclient'
+import { LiquidityPosition, QueryResolvers, Resolvers } from '../../.graphclient'
 
-export const _crossChainLiquidityPositions: QueryResolvers['crossChainLiquidityPositions'] = async (
+const crossChainLiquidityPositions: QueryResolvers['crossChainLiquidityPositions'] = async (
   root,
   args,
   context,
@@ -77,6 +77,6 @@ export const resolvers: Resolvers = {
     chainId: (root, args, context, info) => Number(root.chainId || context.chainId || 1),
   },
   Query: {
-    crossChainLiquidityPositions: _crossChainLiquidityPositions,
+    crossChainLiquidityPositions,
   },
 }

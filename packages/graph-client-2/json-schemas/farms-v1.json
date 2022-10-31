@@ -3,6 +3,6 @@
   "title": "Farms",
   "description": "Farms Array",
   "items": {
-    "$ref": "farm.json#/definitions/Farm"
+    "$ref": "farm-v1.json#/definitions/Farm"
   }
 }

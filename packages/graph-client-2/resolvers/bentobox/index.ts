@@ -1,6 +1,7 @@
 import { BENTOBOX_SUBGRAPH_NAME, SUBGRAPH_HOST } from '@sushiswap/graph-config'
+import { isPromiseFulfilled } from '@sushiswap/validate'
 
-import { Query, QueryResolvers, Resolvers } from '../.graphclient'
+import { Query, QueryResolvers, Resolvers } from '../../.graphclient'
 
 export const crossChainRebases: QueryResolvers['crossChainRebases'] = async (
   root,
@@ -8,7 +9,7 @@ export const crossChainRebases: QueryResolvers['crossChainRebases'] = async (
   context,
   info
 ): Promise<Query['crossChainRebases']> => {
-  return Promise.all<Query['rebases'][]>(
+  return Promise.allSettled<Query['rebases'][]>(
     args.chainIds
       .filter((chainId): chainId is keyof typeof BENTOBOX_SUBGRAPH_NAME => chainId in BENTOBOX_SUBGRAPH_NAME)
       .map((chainId) => {
@@ -26,7 +27,16 @@ export const crossChainRebases: QueryResolvers['crossChainRebases'] = async (
           return rebases.map((rebase) => ({ ...rebase, chainId }))
         })
       })
-  ).then((rebases) => rebases.flat())
+  ).then((promiseSettledResults) => {
+    if (!Array.isArray(promiseSettledResults)) {
+      console.error('rebases query failed...', promiseSettledResults)
+      return []
+    }
+    return promiseSettledResults
+      .flat()
+      .filter(isPromiseFulfilled)
+      .flatMap((promiseFulfilled) => promiseFulfilled.value)
+  })
 }
 
 export const resolvers: Resolvers = {

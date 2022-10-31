@@ -1,5 +1,5 @@
-import { getBuiltGraphSDK, QueryResolvers, Resolvers, UserWithFarm } from '../.graphclient'
-import { fetchBalances } from '../lib/wagmi'
+import { getBuiltGraphSDK, QueryResolvers, Resolvers, UserWithFarm } from '../../.graphclient'
+import { fetchBalances } from '../../lib/wagmi'
 
 export const crossChainUserWithFarms: QueryResolvers['crossChainUserWithFarms'] = async (
   root,
@@ -61,8 +61,8 @@ export const crossChainUserWithFarms: QueryResolvers['crossChainUserWithFarms'] 
 
   const pools = await Promise.all(
     Array.from(new Set([...stakedPoolChainIds, ...liquidityPositionChainIds])).map((chainId) =>
-      sdk.CrossChainPairs({
-        chainIds: [chainId],
+      sdk.PairsByChainId({
+        chainId: chainId,
         where: {
           id_in: [
             ...liquidityPositions
@@ -78,43 +78,15 @@ export const crossChainUserWithFarms: QueryResolvers['crossChainUserWithFarms'] 
   ).then((pools) =>
     pools
       .flat()
-      .map(({ crossChainPairs }) => crossChainPairs)
+      .map(({ pairs }) => pairs)
       .flat()
   )
   // console.log({ pools: pools.flat() })
 
-  console.log(`Fetched ${Object.keys(stakedPoolBalances).length} staked pool balances`, stakedPoolBalances)
-  console.log(`Fetched ${Object.keys(unstakedPoolBalances).length} unstaked pool balances`, unstakedPoolBalances)
-  console.log(`Fetched ${Object.keys(_unstakedPoolBalances).length} _unstaked pool balances`, _unstakedPoolBalances)
-  console.log(`Fetched ${pools.length} pools`)
-
-  console.log(
-    Array.from(new Set([...liquidityPositionPairIds, ...stakedPoolIds]))
-      .filter(
-        (id) =>
-          // this will filter out pair with no staked or unstaked balances...
-          (id in _unstakedPoolBalances || id in stakedPoolBalances) &&
-          // and kashi pairs or other unknown pairs
-          pools.find((el) => {
-            return `${el.chainId}:${el.id}` === id
-          })
-      )
-      .map((id: string) => {
-        const unstakedBalance = _unstakedPoolBalances[id]
-        const stakedBalance = stakedPoolBalances[id]
-        const pair = pools.find((el) => el.id === id.split(':')[1])
-        const balance = Number(unstakedBalance ?? 0) + Number(stakedBalance ?? 0)
-        const valueUSD = (balance / Number(pair?.liquidity ?? 0)) * Number(pair?.liquidityUSD ?? 0)
-        return {
-          id: pair?.id,
-          chainId: pair?.chainId,
-          stakedBalance,
-          unstakedBalance,
-          valueUSD,
-          pair,
-        }
-      })
-  )
+  // console.log(`Fetched ${Object.keys(stakedPoolBalances).length} staked pool balances`, stakedPoolBalances)
+  // console.log(`Fetched ${Object.keys(unstakedPoolBalances).length} unstaked pool balances`, unstakedPoolBalances)
+  // console.log(`Fetched ${Object.keys(_unstakedPoolBalances).length} _unstaked pool balances`, _unstakedPoolBalances)
+  // console.log(`Fetched ${pools.length} pools`)
 
   return Array.from(new Set([...liquidityPositionPairIds, ...stakedPoolIds]))
     .filter(
@@ -131,11 +103,6 @@ export const crossChainUserWithFarms: QueryResolvers['crossChainUserWithFarms'] 
       const stakedBalance = stakedPoolBalances[id]
       const pair = pools.find((el) => el.id === id.split(':')[1])
       const balance = Number(unstakedBalance ?? 0) + Number(stakedBalance ?? 0)
-
-      if (id.includes('0x193008eaade86658df8237a436261e23e3bcbbaa')) {
-        console.log({ stakedBalance, unstakedBalance, pair })
-      }
-
       const valueUSD = (balance / Number(pair?.liquidity ?? 0)) * Number(pair?.liquidityUSD ?? 0)
       return {
         id: pair?.id,

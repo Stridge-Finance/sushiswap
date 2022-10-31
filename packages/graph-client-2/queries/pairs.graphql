@@ -37,31 +37,32 @@ fragment PairFields on Pair {
     feesNative
     feesUSD
     apr
+    aprUpdatedAtTimestamp
 }
 
-query CrossChainPairs(
+query PairsByChainId(
   $first: Int
   $skip: Int
   $where: Pair_filter
   $orderBy: Pair_orderBy
   $orderDirection: OrderDirection
   $block: Block_height
-  $chainIds: [Int!]!
+  $chainId: Int!
 ) {
-  crossChainPairs(
+  pairs: pairsByChainId(
     first: $first
     skip: $skip
     where: $where,
     orderBy: $orderBy
     orderDirection: $orderDirection
     block: $block
-    chainIds: $chainIds
+    chainId: $chainId
   ) {
     ...PairFields
   }
 }
 
-query CrossChainPairsWithFarms(
+query PairsByChainIds(
   $first: Int
   $skip: Int
   $where: Pair_filter
@@ -69,8 +70,9 @@ query CrossChainPairsWithFarms(
   $orderDirection: OrderDirection
   $block: Block_height
   $chainIds: [Int!]!
+  $blocks: [Block_height!]
 ) {
-  crossChainPairsWithFarms(
+  pairs: pairsByChainIds(
     first: $first
     skip: $skip
     where: $where,
@@ -78,8 +80,112 @@ query CrossChainPairsWithFarms(
     orderDirection: $orderDirection
     block: $block
     chainIds: $chainIds
+    blocks: $blocks
   ) {
     ...PairFields
+  }
+}
+
+query PairsWithFarms(
+  $first: Int
+  $skip: Int
+  $where: Pair_filter
+  $orderBy: Pair_orderBy
+  $orderDirection: OrderDirection
+  $block: Block_height
+  $chainIds: [Int!]!
+  $pagination: Pagination
+  $farmsOnly: Boolean
+) {
+  pairs: pairsWithFarms(
+    first: $first
+    skip: $skip
+    where: $where,
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    block: $block
+    chainIds: $chainIds
+    pagination: $pagination
+    farmsOnly: $farmsOnly
+  ) {
+    ...PairFields
+    volume1d
+    volume1w
+    fees1d
+    fees1w
+    feeApr
+    incentiveApr
+    farm {
+      id
+      incentives {
+        apr
+        rewardPerDay
+        rewardToken {
+          address
+          symbol
+          decimals
+        }
+        rewarderAddress
+        rewarderType
+      }
+      chefType
+      poolType
+    }
+  }
+}
+
+query CrossChainPair($id: ID!, $now: Int!, $chainId: Int!) {
+  crossChainPair(id: $id, now: $now, chainId: $chainId) {
+    ...PairFields
+    liquidity1dChange
+    liquidity1wChange
+    volume1d
+    volume1dChange
+    txCount
+    txCount1d,
+    txCount1dChange,
+    feeApr
+    incentiveApr
+    farm {
+      id
+      incentives {
+        apr
+        rewardPerDay
+        rewardToken {
+          address
+          symbol
+          decimals
+        }
+        rewarderAddress
+        rewarderType
+      }
+      chefType
+      poolType
+    }
+    hourSnapshots(first: 168, orderBy: date, orderDirection: desc) {
+      id
+      date
+      volumeUSD
+      liquidityNative
+      liquidityUSD
+      transactionCount
+    }
+    daySnapshots(first: 730, orderBy: date, orderDirection: desc) {
+      id
+      date
+      volumeUSD
+      liquidityNative
+      liquidityUSD
+      transactionCount
+    }
+    dayChangeData: daySnapshots(first: 2, orderBy: date, orderDirection: desc, where: { date_lt: $now }) {
+      id
+      date
+      volumeUSD
+      liquidityNative
+      liquidityUSD
+      transactionCount
+    }
   }
 }
 

@@ -1,5 +1,9 @@
-query Farms {
-  farms {
+query FarmsV0 {
+  farms: farmsv0
+}
+
+query FarmsV1 {
+  farms: farmsv1 {
     id
     chainId
     pool
